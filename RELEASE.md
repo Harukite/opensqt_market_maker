@@ -2,7 +2,7 @@
 
 ## 版本规范
 
-- 版本号以 [main.go](main.go#L21) 中的 `Version` 为唯一来源，格式固定为 `v主版本.次版本.修订号`，例如 `v3.4.2`。
+- 版本号以 [main.go](main.go#L21) 中的 `Version` 为唯一来源，格式固定为 `v主版本.次版本.修订号`，例如 `v3.4.3`。
 - Git 标签必须与 `Version` 完全一致。
 - GitHub Release 名称、Tag 名称、发行包文件名必须与该版本号保持一致。
 - [ARCHITECTURE.md](ARCHITECTURE.md) 顶部文档版本建议同步更新，避免文档和程序版本脱节。
@@ -23,24 +23,38 @@ go build ./...
 5. 创建并推送同名标签，例如：
 
 ```bash
-git tag -a v3.4.2 -m "Release v3.4.2"
+git tag -a v3.4.3 -m "Release v3.4.3"
 git push origin main
-git push origin v3.4.2
+git push origin v3.4.3
 ```
 
-6. 生成发行包：
+6. 推送标签后，GitHub Actions 会自动：
+
+- 校验 [main.go](main.go#L21) 的版本号和 tag 一致
+- 构建 Linux amd64、Windows amd64、MacOS arm64 三个平台附件
+- 自动创建或更新 GitHub Release
+- 自动上传压缩包和对应的 `.sha256` 文件
+
+7. 如需本地手动生成单个平台发行包：
 
 ```bash
 ./scripts/package_release.sh
 ```
 
-7. 将 `dist/` 下生成的 `.tar.gz` 和 `.sha256` 上传到 GitHub Release。
+也可以指定平台：
+
+```bash
+TARGET_OS=windows TARGET_ARCH=amd64 ./scripts/package_release.sh
+TARGET_OS=MacOS TARGET_ARCH=arm64 ./scripts/package_release.sh
+```
+
+脚本对外推荐使用 `TARGET_OS` 和 `TARGET_ARCH`。内部仍会自动映射到 Go 的标准目标平台，例如 `MacOS -> darwin`。
 
 ## 发行包内容
 
 脚本 [scripts/package_release.sh](scripts/package_release.sh) 会生成以下内容：
 
-- 编译后的可执行文件 `opensqt_market_maker`
+- 编译后的可执行文件 `opensqt_market_maker` 或 `opensqt_market_maker.exe`
 - 整个 `live_server/` 目录
 - `config.example.yaml`
 - `config.yaml`
@@ -55,5 +69,7 @@ git push origin v3.4.2
 
 ## 推荐命名
 
-- 发行包：`opensqt_market_maker_v3.4.2_linux_amd64.tar.gz`
-- 校验文件：`opensqt_market_maker_v3.4.2_linux_amd64.tar.gz.sha256`
+- 发行包：`opensqt_market_maker_v3.4.3_linux_amd64.tar.gz`
+- Windows 发行包：`opensqt_market_maker_v3.4.3_windows_amd64.zip`
+- MacOS 发行包：`opensqt_market_maker_v3.4.3_MacOS_arm64.tar.gz`
+- 校验文件：`opensqt_market_maker_v3.4.3_linux_amd64.tar.gz.sha256`

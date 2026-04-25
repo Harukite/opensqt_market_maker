@@ -165,6 +165,15 @@ go build -o opensqt
 ./scripts/package_release.sh
 ```
 
+也可以指定目标平台：
+
+```bash
+TARGET_OS=windows TARGET_ARCH=amd64 ./scripts/package_release.sh
+TARGET_OS=MacOS TARGET_ARCH=arm64 ./scripts/package_release.sh
+```
+
+推送版本 tag 后，GitHub Actions 会自动构建并发布 Linux、Windows、MacOS 三个平台附件到 GitHub Release，其中 MacOS 使用 Apple Silicon 对应的 arm64 架构。
+
 生成的发行包默认包含：
 
 - 编译后的可执行文件
